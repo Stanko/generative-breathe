@@ -1,0 +1,5 @@
+node_modules
+metaball.bundle.js
+dist
+.cache
+.DS_Store
