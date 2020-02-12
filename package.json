@@ -8,6 +8,8 @@
   },
   "author": "Stanko",
   "dependencies": {
+    "@anvaka/streamlines": "^1.1.0",
+    "p5": "^0.10.2",
     "parcel-bundler": "^1.12.4"
   }
 }

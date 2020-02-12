@@ -31,7 +31,6 @@ class Metaballs {
   generateCircle(options) {
     const circle = {
       x: (Math.random() * options.w * 0.5) + (normalDistribution() * options.w * 0.5) - (options.w / 2) + options.center.x,
-      // y: (Math.random() * options.h * 0.85) + (normalDistribution() * options.h * 0.15) - (options.h / 2) + options.center.y,
       y: (Math.random() * options.h * 1) + (normalDistribution() * options.h * 1 * 1) - (options.h / 2 * 2) + options.center.y,
       r: Math.random() * (options.rMax - options.rMin) + options.rMax
     };
