@@ -1,10 +1,11 @@
 const p5 = require("p5");
 const streamlines = require("@anvaka/streamlines");
 const Metaballs = require("./metaballs");
-const { createSvg } = require("./utils/general");
+const { createSvg, normalDistribution } = require("./utils/general");
 
-const width = 800;
-const height = 1200;
+const margin = 100;
+const width = 1600;
+const height = 1000;
 const xStep = 200;
 const yStep = 300;
 const xMax = width / xStep - 1;
@@ -29,9 +30,12 @@ window.setup = function() {
   //   });
   // });
 
+  const layer1 = [];
+  const layer2 = [];
+
   streamlines({
     vectorField: p => {
-      const n = noise(p.x / 400, p.y / 100);
+      const n = noise(p.x / 100, p.y / 100);
       let sign; // = p.x > width / 3 ? -0.8 : 0.8;
       
       let diff = width * 0.33 - p.x;
@@ -56,11 +60,11 @@ window.setup = function() {
       };
     },
     // Defines bounding box of the vector field
-    boundingBox: { left: 0, top: 0, width, height },
+    boundingBox: { left: margin, top: margin, width: width - 2 * margin, height: height - 2 * margin },
 
     // Defines the first point where integration should start. If this is
     // not specified a random point inside boundingBox is selected
-    seed: { x: width / 2, y: height },
+    seed: { x: (width - 2 * margin) / 2, y: height - 2 * margin },
 
     // Separation distance between new streamlines.
     dSep: 50,
@@ -78,29 +82,139 @@ window.setup = function() {
       let stroke = '#ddd';
 
       if (
-        Math.abs(points[0].x - (width / 2)) > width * 0.18 && 
-        points[0].y > height * 0.99
+        Math.abs(points[0].x - (width / 2)) > width * 0.1 && 
+        Math.abs(points[0].y - (height - margin)) < 10
       ) {
         stroke = 'blue';
         return;
       } 
 
       if (
-        Math.abs(points[points.length - 1].x - (width / 2)) > width * 0.18 && 
-        points[points.length - 1].y > height * 0.99
+        Math.abs(points[points.length - 1].x - (width / 2)) > width * 0.1 && 
+        Math.abs(points[points.length - 1].y - (height - margin)) < 10
       ) {
         stroke = 'blue';
         return;
       } 
 
       for (let i = 0; i < points.length; i += 10) {
-        const p = points[i];
-        svg.innerHTML += `<circle cx="${ p.x }" cy="${ p.y }" r="2" />`;
+        const point = points[i];
+        const nextPoint = points[i + 5];
+
+        if (nextPoint) {
+          const dy = nextPoint.y - point.y;
+          const dx = nextPoint.x - point.x;
+          point.angle = Math.atan2(dy, dx); // range (-PI, PI]
+          
+          // svg.innerHTML += `<circle cx="${ point.x }" cy="${ point.y }" r="2" />`;
+          layer1.push(point);
+
+          // svg.innerHTML += `<path 
+          //   stroke="#3498db" 
+          //   stroke-width="3"
+          //   stroke-linecap="round"
+          //   stroke-linejoin="round"
+          //   fill="none"
+          //   d="
+          //     M ${ point.x } ${ point.y }
+          //     L ${ nextPoint.x } ${ nextPoint.y }
+          //   "
+          // />`;
+        }
       }
+
+      // svg.innerHTML += `<path 
+      //   stroke="${ stroke }"
+      //   stroke-width="1"
+      //   stroke-linecap="round"
+      //   stroke-linejoin="round"
+      //   fill="none"
+      //   d="M ${ points.map(p => `${ p.x } ${ p.y }`).join(' L ') }"
+      // />`;
+    }
+  }).run();
+
+  streamlines({
+    vectorField: p => {
+      const n = noise(p.x / 100, p.y / 100);
+      let sign; // = p.x > width / 3 ? -0.8 : 0.8;
+      
+      let diff = width * 0.33 - p.x;
+      diff = diff / (width * 0.33) * 0.7;
+
+      if (diff > 0) {
+        sign = 1 - diff;
+      } else {
+        sign = - 1 - diff * 0.66;
+      }
+      // 300
+      
+
+      const a = n * sign * Math.PI;
+      
+      const x = Math.cos(a) * 10;
+      const y = Math.sin(a) * 10;
+
+      return {
+        x,
+        y,
+      };
+    },
+    // Defines bounding box of the vector field
+    boundingBox: { left: margin, top: margin, width: width - 2 * margin, height: height - 2 * margin },
+
+    // Defines the first point where integration should start. If this is
+    // not specified a random point inside boundingBox is selected
+    seed: { x: (width - 2 * margin) / 2, y: height - 2 * margin },
+
+    // Separation distance between new streamlines.
+    dSep: 20,
+
+    // Distance between streamlines when integration should stop.
+    dTest: 8,
+
+    // Integration time step (passed to RK4 method.)
+    timeStep: 10,
+
+    onStreamlineAdded(points) {
+      // Points is just a sequence of points with `x, y` coordinates through which
+      // the streamline goes.
+
+      let stroke = '#ddd';
+
+      if (
+        Math.abs(points[0].x - (width / 2)) > width * 0.1 && 
+        Math.abs(points[0].y - (height - margin)) < 10
+      ) {
+        stroke = 'blue';
+        return;
+      } 
+
+      if (
+        Math.abs(points[points.length - 1].x - (width / 2)) > width * 0.1 && 
+        Math.abs(points[points.length - 1].y - (height - margin)) < 10
+      ) {
+        stroke = 'blue';
+        return;
+      }
+
+      // for (let i = 0; i < points.length; i += 3) {
+      //   const point = points[i];
+      //   const nextPoint = points[i + 5];
+
+      //   if (nextPoint) {
+      //     const dy = nextPoint.y - point.y;
+      //     const dx = nextPoint.x - point.x;
+      //     point.angle = Math.atan2(dy, dx); // range (-PI, PI]
+          
+      //     // svg.innerHTML += `<circle cx="${ point.x }" cy="${ point.y }" r="2" />`;
+      //     layer2.push(point);
+      //   }
+      // }
 
       svg.innerHTML += `<path 
         stroke="${ stroke }"
-        stroke-width="1"
+        stroke-width="3"
         stroke-linecap="round"
         stroke-linejoin="round"
         fill="none"
@@ -109,41 +223,88 @@ window.setup = function() {
     }
   }).run();
 
-  // createLayer();
+
+  // setTimeout(() => {
+  //   createLayer(layer2, {
+  //     cellSize: 1,
+  //     numCircles: 3,
+  //     w: 10 + 10 * Math.random(),
+  //     h: 15 + 10 * Math.random(),
+  //     color: "#afbcbd",
+  //     rMax: 0.6,
+  //     rMin: 0.1, 
+  //   });
+  //   console.log('layer 2');
+  // }, 2000);
+
+  setTimeout(() => {
+    createLayer(layer1);
+    console.log('layer 1');
+  }, 3000);
 
   document.body.prepend(svg);
 }
 
 
-function createLayer() {
-  for (let x = 1; x <= xMax; x++) {
-    for (let y = 1; y <= yMax; y++) {
-      const m = new Metaballs({
-        svg,
-        cellSize: 2,
-        threshold: 1, 
-        numCircles: 22,
-        center: {
-          x: x * xStep,
-          y: y * yStep,
-        },
-        w: 100 + 100 * Math.random(),
-        h: 120 + 100 * Math.random(),
-        rMax: 6,
-        rMin: 1, 
-        imageWidth: width,
-        imageHeight: height,
-      });
-    
-      draw(svg, m.shapes);
-    }
-  }
-
+function createLayer(layer, options = {}) {
+  options = {
+    cellSize: 2,
+    numCircles: 22,
+    w: 20 + 60 * normalDistribution(),
+    h: 20 + 120 * normalDistribution(),
+    color: "#7f8c8d",
+    rMax: 2,
+    rMin: 0.2, 
+    ...options,
+  };
+  
+  layer.forEach(point => {
+    let m = {};
+    m = new Metaballs({
+      svg,
+      cellSize: options.cellSize,
+      threshold: 1, 
+      numCircles: options.numCircles,
+      center: point,
+      w: options.w,
+      h: options.h,
+      rMax: options.rMax,
+      rMin: options.rMin,
+      imageWidth: width,
+      imageHeight: height,
+    });
+  
+    draw(svg, m.shapes, point, options.color);
+  });
 }
 
-function draw(svg, shapes) {
-  // TODO check for holes
+function draw(svg, shapes, point = null, color = "#7f8c8d") {
+  let rotation = '';
 
+  if (point.angle) {
+    rotation = `rotate(${ (point.angle + Math.PI / 2) * 180 / Math.PI }, ${ point.x }, ${ point.y })`;
+  }
+
+  if (!shapes) {
+    // Draws a rectangle instead of the shape
+    svg.innerHTML += `<path 
+    stroke="${ color }" 
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+      d="
+        M ${ point.x - 2 } ${ point.y - 4 }
+        L ${ point.x + 2 } ${ point.y - 4 }
+        L ${ point.x + 2 } ${ point.y + 4 }
+        L ${ point.x - 2 } ${ point.y + 4 }
+        Z
+      "
+      transform="${ rotation }"
+    />`;
+    return;
+  }
+  
   let d = '';
 
   // colors = ['blue', 'red', 'green', 'yellow'];
@@ -156,16 +317,15 @@ function draw(svg, shapes) {
     d += `M ${ line.map(p => `${ p.x } ${ p.y }`).join(' L ') } Z`;
   });
 
-  // transform="rotate(-10 50 100) angle center.x center.y
-
+  // fill="#ecf0f1"
   svg.innerHTML += `<path 
-    stroke="#7f8c8d" 
-    stroke-width="5"
+    stroke="${ color }" 
+    stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"
-    fill="#ecf0f1"
     fill="none"
-    d="${ d }" 
+    d="${ d }"
+    transform="${ rotation }"
   />`;
 }
 
@@ -178,7 +338,7 @@ function generateField(rows, columns, step) {
     for (let j = 0; j <= columns; j++) {
       const x = i * step;
       const y = j * step;
-      const n = noise(i / 400, j / 1-0);
+      const n = noise(i / 400, j / 100);
       const a = n * -Math.PI / 2 - Math.PI / 4;
       
       const directionVector = { x: 0, y: 0 };
