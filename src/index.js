@@ -1,33 +1,42 @@
-import 'p5';
-import streamlines from '@anvaka/streamlines';
 import Metaballs from './metaballs';
 import { createSvg, normalDistribution } from './utils/general';
 import * as martinez from 'martinez-polygon-clipping';
-import { fatLine } from 'generative-utils/svg/fat-line';
+import seedrandom from 'seedrandom';
+import { isPolygonInPolygon } from '../../generative-utils/points';
+
+const seed =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+const rng = seedrandom(seed);
+
+Math.random = rng;
+
+console.log('RNG seed: ' + seed);
 
 const width = 1000;
 const height = 1500;
 
 const svg = createSvg(width, height);
 
+document.querySelector('#seed').innerHTML = seed;
+document.body.prepend(svg);
+
 svg.innerHTML = `
 <pattern 
   id="vertical-lines" 
-  width="5" 
-  height="5" 
-  patternUnits="userSpaceOnUse"
->
-  <rect x="0" y="0" height="100%" width="100%" fill="white" />
-  <line x1="0" y1="0" x2="0" y2="100%" stroke="#f06d01" stroke-width="2" />
-</pattern>
-<pattern 
-  id="horizontal-lines" 
-  width="20" 
+  width="10" 
   height="10" 
   patternUnits="userSpaceOnUse"
 >
-  <rect x="0" y="0" height="100%" width="100%" fill="white" />
-  <line x1="0" y1="0" x2="100%" y2="0" stroke="#8dbfb6" stroke-width="4" />
+  <rect x="0" y="0" height="100%" width="100%" fill="#f3f4f6" />
+  <line x1="3" y1="0" x2="3" y2="100%" stroke="#f06d01" stroke-width="2" />
+</pattern>
+<pattern 
+  id="horizontal-lines" 
+  width="10" 
+  height="10" 
+  patternUnits="userSpaceOnUse"
+>
+  <rect x="0" y="0" height="100%" width="100%" fill="#f3f4f6" />
+  <line x1="0" y1="3" x2="100%" y2="3" stroke="#8dbfb6" stroke-width="2" />
 </pattern>
 `;
 
@@ -46,198 +55,226 @@ function drawPolyFromArray(
   />`;
 }
 
-function getShapesPolygon() {
-  return {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: []
-    }
-  };
+function drawBackground() {
+  const step = 20;
+  for (let i = 0; i < height; i += step) {
+    let y1 = i + Math.floor(Math.random() * step) * 0.66;
+    let y2 = i + Math.floor(Math.random() * step) * 0.66;
+    const lineWidth = 5 + Math.floor((Math.random() * step) / 2);
+
+    svg.innerHTML += `<path 
+      fill="hsl(${180 + Math.random() * 40}, 40%, 60%)" 
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+      d="M 0 ${y1} L ${width} ${y2} L ${width} ${y2 + lineWidth} L ${0} ${y1 +
+      lineWidth} Z"
+    />`;
+  }
 }
 
-drawPolyFromArray(
-  [
-    [0, 0],
-    [0, height],
-    [width, height],
-    [width, 0]
-  ],
-  '#e2dbd3'
-);
+drawBackground();
 
-window.setup = function() {
-  streamlines({
-    vectorField: p => {
-      const n = noise(p.x / 100, p.y / 100);
-      let sign; // = p.x > width / 3 ? -0.8 : 0.8;
+function drawPolygon(polygon, fill, stroke, strokeWidth) {
+  if (!polygon) {
+    return;
+  }
 
-      let diff = width * 0.33 - p.x;
-      diff = (diff / (width * 0.33)) * 0.7;
+  let d = '';
 
-      if (diff > 0) {
-        sign = 1 - diff;
-      } else {
-        sign = -1 - diff * 0.66;
-      }
-      // 300
-
-      const a = n * sign * Math.PI;
-
-      const x = Math.cos(a) * 10;
-      const y = Math.sin(a) * 10;
-
-      return {
-        x,
-        y
-      };
-    },
-    // Defines bounding box of the vector field
-    boundingBox: { left: 0, top: 0, width: width, height: height },
-
-    // Defines the first point where integration should start. If this is
-    // not specified a random point inside boundingBox is selected
-    seed: { x: width / 2, y: height },
-
-    // Separation distance between new streamlines.
-    dSep: 50,
-
-    // Distance between streamlines when integration should stop.
-    dTest: 30,
-
-    // Integration time step (passed to RK4 method.)
-    timeStep: 10,
-
-    onStreamlineAdded(points) {
-      // Points is just a sequence of points with `x, y` coordinates through which
-      // the streamline goes.
-
-      let stroke = '#333';
-
-      if (
-        Math.abs(points[0].x - lineWidth / 2) > lineWidth * 0.1 &&
-        Math.abs(points[0].y - height) < 10
-      ) {
-        stroke = 'blue';
-        return;
-      }
-
-      if (
-        Math.abs(points[points.length - 1].x - lineWidth / 2) > lineWidth * 0.1 &&
-        Math.abs(points[points.length - 1].y - height) < 10
-      ) {
-        stroke = 'blue';
-        return;
-      }
-
-      // d="M ${points.map(p => `${p.x} ${p.y}`).join(' L ')}"
-      const lineWidth = Math.floor(Math.random() * 5) + 3;
-      const fn = (x, totalLength) => {
-        return Math.sin(x * Math.PI) * lineWidth + 3;
-      };
-      svg.innerHTML += `<path 
-        stroke="${stroke}"
-        stroke-width="3"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        fill="none"
-        d="${fatLine(points, fn)}"
-      />`;
+  polygon.forEach((polygonPart, index) => {
+    if (polygonPart.length === 1) {
+      drawPolygon(polygonPart, fill, stroke, strokeWidth);
+      return;
     }
-  }).run();
 
-  const m = new Metaballs({
+    if (index === 0) {
+      d += 'M ' + polygonPart.map(p => `${p[0]} ${p[1]}`).join(' L ') + '';
+    } else {
+      d +=
+        'M ' +
+        polygonPart
+          .reverse()
+          .map(p => `${p[0]} ${p[1]}`)
+          .join(' L ') +
+        '';
+    }
+  });
+
+  svg.innerHTML += `<path 
+    stroke="${stroke}" 
+    stroke-width="${strokeWidth}"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="${fill}"
+    d="${d}"
+  />`;
+}
+
+function drawMultiPolygon(
+  multiPolygon,
+  fill = 'rgba(0, 0, 100, 0.3)',
+  stroke = 'none',
+  strokeWidth = 10
+) {
+  if (!multiPolygon) {
+    return;
+  }
+
+  multiPolygon.forEach((polygon, index) => {
+    drawPolygon(polygon, fill, stroke, strokeWidth);
+  });
+}
+
+function flattenPolygon(polygon) {
+  const flat = [];
+
+  polygon.forEach((polygonPart, index) => {
+    if (polygonPart.length === 1) {
+      flat.push(...flattenPolygon(polygonPart, fill, stroke));
+    } else {
+      flat.push(polygonPart);
+    }
+  });
+
+  return flat;
+}
+
+function fixHoles(multiPolygon) {
+  const flat = [];
+
+  multiPolygon.forEach((polygon, index) => {
+    flat.push(...flattenPolygon(polygon));
+  });
+
+  const f = flat.map(shape => {
+    return shape.map(p => {
+      return {
+        x: p[0],
+        y: p[1]
+      };
+    });
+  });
+
+  return flatToMultiPolygon(f);
+}
+
+function flatToMultiPolygon(flatShapes) {
+  const holes = [];
+  const shapes = flatShapes.map(s => [s]);
+
+  for (let i = 0; i < flatShapes.length; i++) {
+    const innerPolygon = flatShapes[i];
+
+    let isIn = false;
+
+    for (let j = 0; j < flatShapes.length; j++) {
+      if (i === j) {
+        continue;
+      }
+      const outerPolygon = flatShapes[j];
+
+      isIn = isPolygonInPolygon(innerPolygon, outerPolygon);
+
+      if (isIn) {
+        holes.push(i);
+
+        if (!shapes[j].holes) {
+          shapes[j].holes = [];
+        }
+        shapes[j].holes.push(flatShapes[i]);
+        break;
+      }
+    }
+  }
+
+  holes.reverse().forEach(holeIndex => {
+    shapes.splice(holeIndex, 1);
+  });
+
+  const poly = shapes.map(shape => {
+    const l = shape.map(line => {
+      return line.map(p => {
+        return [p.x, p.y];
+      });
+    });
+
+    if (shape.holes) {
+      const holes = shape.holes.map(hole => {
+        return hole.map(p => {
+          return [p.x, p.y];
+        });
+      });
+
+      return [...l, ...holes];
+    }
+
+    return l;
+  });
+
+  return poly;
+}
+
+function createShape(userOptions = {}) {
+  const options = {
     svg,
     cellSize: 2,
     threshold: 1,
     numCircles: 90,
     center: {
-      x: width / 2,
+      x: width * 0.4,
       y: height / 2
     },
-    w: width,
+    w: width * 0.66,
     h: height * 0.5,
     rMax: 13,
     rMin: 2,
     imageWidth: width,
-    imageHeight: height
+    imageHeight: height,
+    ...userOptions
+  };
+
+  const m = new Metaballs(options);
+
+  const poly = flatToMultiPolygon(m.shapes);
+
+  let d = '';
+
+  m.shapes.forEach((line, index) => {
+    d += `M ${line.map(p => `${p.x} ${p.y}`).join(' L ')} Z`;
   });
 
-  const polygon1 = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [
-        [
-          [0, 0],
-          [width * 0.66, 0],
-          [width * 0.33, height],
-          [0, height]
-        ]
-      ]
-    }
-  };
+  // svg.innerHTML += `<path
+  //   stroke="black"
+  //   stroke-width="1"
+  //   stroke-linecap="round"
+  //   stroke-linejoin="round"
+  //   fill="none"
+  //   d="${ d }"
+  // />`;
 
-  const polygon2 = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [
-        [
-          [width, 0],
-          [width * 0.66, 0],
-          [width * 0.33, height],
-          [width, height]
-        ]
-      ]
-    }
-  };
+  return poly;
+}
 
-  this.setTimeout(() => {
-    // let d = '';
+const shape1 = createShape();
+const shape2 = createShape({
+  center: {
+    x: width * 0.6,
+    y: height / 2
+  }
+});
 
-    m.shapes.forEach((line, index) => {
-      let l = line;
-      if (index % 2 === 0) {
-        l.reverse();
-      }
+const diff1 = fixHoles(martinez.diff(shape1, shape2));
 
-      const shapesPolygon = getShapesPolygon();
-      shapesPolygon.geometry.coordinates.push(line.map(p => [p.x, p.y]));
+const diff2 = fixHoles(martinez.diff(shape2, shape1));
 
-      const intersection = martinez.intersection(
-        polygon1.geometry.coordinates,
-        shapesPolygon.geometry.coordinates
-      );
-      if (intersection) {
-        intersection.forEach(polygon => {
-          drawPolyFromArray(polygon[0], '#ee6b00', '#151414');
-        });
-      }
+const union = fixHoles(martinez.union(shape1, shape2));
 
-      const intersection2 = martinez.intersection(
-        polygon2.geometry.coordinates,
-        shapesPolygon.geometry.coordinates
-      );
-      if (intersection2) {
-        intersection2.forEach(polygon => {
-          drawPolyFromArray(polygon[0], '#8dbfb6', '#151414');
-        });
-      }
+const intersection = fixHoles(martinez.intersection(shape1, shape2));
 
-      // d += `M ${ line.map(p => `${ p.x } ${ p.y }`).join(' L ') } Z`;
-    });
-
-    // fill="#ecf0f1"
-    // svg.innerHTML += `<path
-    //   stroke="blue"
-    //   stroke-width="2"
-    //   stroke-linecap="round"
-    //   stroke-linejoin="round"
-    //   fill="none"
-    //   d="${ d }"
-    // />`;
-
-    document.body.prepend(svg);
-  }, 2000);
-};
+drawMultiPolygon(union, 'none', 'white', 40);
+drawMultiPolygon(diff1, 'hsl(210, 40%, 50%)');
+drawMultiPolygon(diff2, 'hsl(190, 40%, 50%)');
+drawMultiPolygon(intersection, 'hsl(200, 40%, 50%)');
+drawMultiPolygon(union, 'none', 'hsl(220, 40%, 50%)');
