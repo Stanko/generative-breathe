@@ -9,6 +9,7 @@ const HASH_PARAMS = [
   "imageWidth",
   "margin",
   "backgroundStep",
+  "backgroundSeed",
   "shapeOneSeed",
   "shapeTwoSeed",
 ];
@@ -16,6 +17,7 @@ const HASH_PARAMS = [
 const STRING_PARAMS = [
   "shapeOneSeed",
   "shapeTwoSeed",
+  "backgroundSeed",
 ];
 
 const BOOLEANS_PARAMS = [
@@ -38,6 +40,7 @@ export default class Controls extends Component {
       imageWidth: 1000,
       margin: 100,
       backgroundStep: 20,
+      backgroundSeed: getRandomString(),
       shapeOneSeed: getRandomString(),
       shapeTwoSeed: getRandomString(),
       ...this.getStateFromHash()
@@ -110,9 +113,15 @@ export default class Controls extends Component {
     });
   };
 
-  generateNewShapeOneTwo = () => {
+  generateNewShapeOneTwoSeed = () => {
     this.setHash({
       shapeTwoSeed: getRandomString()
+    });
+  };
+
+  generateNewBackgroundSeed = () => {
+    this.setHash({
+      backgroundSeed: getRandomString()
     });
   };
 
@@ -128,6 +137,7 @@ export default class Controls extends Component {
       imageWidth,
       margin,
       backgroundStep,
+      backgroundSeed,
       shapeOneSeed,
       shapeTwoSeed,
     } = this.state;
@@ -149,6 +159,7 @@ export default class Controls extends Component {
           </div>
           <Control
             name="lowPoly"
+            label="Low poly (increases performance)"
             value={lowPoly}
             type="checkbox"
             setState={this.setHash}
@@ -190,6 +201,12 @@ export default class Controls extends Component {
             setState={this.setHash}
           />
           <Control
+            name="backgroundSeed"
+            value={backgroundSeed}
+            type="text"
+            setState={this.setHash}
+          />
+          <Control
             name="shapeOneSeed"
             value={shapeOneSeed}
             type="text"
@@ -203,10 +220,13 @@ export default class Controls extends Component {
           />
           
           <div className="Controls-buttons">
+            <button onClick={this.generateNewBackgroundSeed}>
+              Regenerate Background
+            </button>
             <button onClick={this.generateNewShapeOneSeed}>
               Regenerate Shape One
             </button>
-            <button onClick={this.generateNewShapeOneTwo}>
+            <button onClick={this.generateNewShapeOneTwoSeed}>
               Regenerate Shape Two
             </button>
             <button className="Controls-reset" onClick={this.reset}>

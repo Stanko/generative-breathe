@@ -29,10 +29,12 @@ class Metaballs {
 
 
   generateCircle(options) {
+    const rng = this.options.rng;
+    
     const circle = {
-      x: (Math.random() * options.w * 0.8) - (options.w / 2 * 0.8) + options.center.x,
-      y: (Math.random() * options.h * 1) + (normalDistribution() * options.h * 1 * 1) - (options.h / 2 * 2) + options.center.y,
-      r: Math.random() * (options.rMax - options.rMin) + options.rMax
+      x: (rng() * options.w * 0.8) - (options.w / 2 * 0.8) + options.center.x,
+      y: (rng() * options.h * 1) + (normalDistribution(rng) * options.h * 1 * 1) - (options.h / 2 * 2) + options.center.y,
+      r: rng() * (options.rMax - options.rMin) + options.rMax
     };
 
     circle.r2 = circle.r * circle.r;

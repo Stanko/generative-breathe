@@ -104,6 +104,7 @@ export default class Breathe extends Component {
     } = this.props;
 
     const options = {
+      rng: Math.random,
       cellSize: lowPoly ? 10 : 2,
       threshold: 1,
       circlesCount: 90,
@@ -119,7 +120,7 @@ export default class Breathe extends Component {
       imageHeight,
       ...userOptions
     };
-  
+
     const m = new Metaballs(options);
   
     return flatToMultiPolygon(m.shapes);
@@ -136,19 +137,25 @@ export default class Breathe extends Component {
   };
 
   drawBackground() {
-    const { imageWidth, imageHeight, backgroundStep } = this.props;
+    const {
+      imageWidth,
+      imageHeight,
+      backgroundStep,
+      backgroundSeed,
+    } = this.props;
 
     const background = [];
+    const rng = seedrandom(backgroundSeed);
 
     for (let i = 0; i < imageHeight; i += backgroundStep) {
-      let y1 = i + Math.floor(Math.random() * backgroundStep) * 0.66;
-      let y2 = i + Math.floor(Math.random() * backgroundStep) * 0.66;
-      const lineWidth = 5 + Math.floor((Math.random() * backgroundStep) / 2);
+      let y1 = i + Math.floor(rng() * backgroundStep) * 0.66;
+      let y2 = i + Math.floor(rng() * backgroundStep) * 0.66;
+      const lineWidth = 5 + Math.floor((rng() * backgroundStep) / 2);
 
       background.push(
         <path
           key={ i }
-          fill={ `hsl(${180 + Math.random() * 40}, 40%, 60%)` }
+          fill={ `hsl(${180 + rng() * 40}, 40%, 60%)` }
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -229,9 +236,21 @@ export default class Breathe extends Component {
   
 
   render() {
-    const { imageWidth, imageHeight, margin } = this.props;
-    const shape1 = this.createShape();
+    const { 
+      imageWidth, 
+      imageHeight, 
+      shapeOneSeed,
+      shapeTwoSeed,
+      margin, 
+    } = this.props;
+    const shapeOneRng = seedrandom(shapeOneSeed);
+    const shapeTwoRng = seedrandom(shapeTwoSeed);
+
+    const shape1 = this.createShape({
+      rng: shapeOneRng,
+    });
     const shape2 = this.createShape({
+      rng: shapeTwoRng,
       center: {
         x: imageWidth * 0.6,
         y: imageHeight / 2
