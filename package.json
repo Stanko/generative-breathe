@@ -9,6 +9,7 @@
   "author": "Stanko",
   "dependencies": {
     "@anvaka/streamlines": "^1.1.0",
+    "dat.gui": "^0.7.6",
     "generative-utils": "git://github.com/Stanko/generative-utils.git",
     "martinez-polygon-clipping": "^0.6.0",
     "p5": "^0.10.2",

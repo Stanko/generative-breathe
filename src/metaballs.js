@@ -18,7 +18,7 @@ class Metaballs {
       this.circles = options.circles;
     } else {
       this.circles = [];
-      for (let i = 0; i < options.numCircles; i++) {
+      for (let i = 0; i < options.circlesCount; i++) {
         this.circles.push(this.generateCircle(this.options));
       }
     }

@@ -1,68 +1,23 @@
-import Metaballs from './metaballs';
-import { createSvg, normalDistribution } from './utils/general';
 import * as martinez from 'martinez-polygon-clipping';
 import seedrandom from 'seedrandom';
+import * as dat from 'dat.gui';
+
+import Metaballs from './metaballs';
+import { createSvg } from './utils/general';
 import { isPolygonInPolygon } from '../../generative-utils/points';
 
-const seed =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-const rng = seedrandom(seed);
-
-Math.random = rng;
-
-console.log('RNG seed: ' + seed);
-
-const width = 1000;
-const height = 1500;
-
-const svg = createSvg(width, height);
-
-document.querySelector('#seed').innerHTML = seed;
-document.body.prepend(svg);
-
-svg.innerHTML = `
-<pattern 
-  id="vertical-lines" 
-  width="10" 
-  height="10" 
-  patternUnits="userSpaceOnUse"
->
-  <rect x="0" y="0" height="100%" width="100%" fill="#f3f4f6" />
-  <line x1="3" y1="0" x2="3" y2="100%" stroke="#f06d01" stroke-width="2" />
-</pattern>
-<pattern 
-  id="horizontal-lines" 
-  width="10" 
-  height="10" 
-  patternUnits="userSpaceOnUse"
->
-  <rect x="0" y="0" height="100%" width="100%" fill="#f3f4f6" />
-  <line x1="0" y1="3" x2="100%" y2="3" stroke="#8dbfb6" stroke-width="2" />
-</pattern>
-`;
-
-function drawPolyFromArray(
-  polygon,
-  fill = 'url(#horizontal-lines)',
-  stroke = 'none'
-) {
-  svg.innerHTML += `<path 
-    stroke="${stroke}" 
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    fill="${fill}"
-    d="M ${polygon.map(p => `${p[0]} ${p[1]}`).join(' L ')} Z"
-  />`;
-}
 
 function drawBackground() {
   const step = 20;
+  
+  let g = '<g>';
+
   for (let i = 0; i < height; i += step) {
     let y1 = i + Math.floor(Math.random() * step) * 0.66;
     let y2 = i + Math.floor(Math.random() * step) * 0.66;
     const lineWidth = 5 + Math.floor((Math.random() * step) / 2);
 
-    svg.innerHTML += `<path 
+    g += `<path 
       fill="hsl(${180 + Math.random() * 40}, 40%, 60%)" 
       stroke-width="2"
       stroke-linecap="round"
@@ -72,9 +27,11 @@ function drawBackground() {
       lineWidth} Z"
     />`;
   }
-}
 
-drawBackground();
+  g += '</g>';
+
+  svg.innerHTML += g;
+}
 
 function drawPolygon(polygon, fill, stroke, strokeWidth) {
   if (!polygon) {
@@ -85,8 +42,7 @@ function drawPolygon(polygon, fill, stroke, strokeWidth) {
 
   polygon.forEach((polygonPart, index) => {
     if (polygonPart.length === 1) {
-      drawPolygon(polygonPart, fill, stroke, strokeWidth);
-      return;
+      g += drawPolygon(polygonPart, fill, stroke, strokeWidth);
     }
 
     if (index === 0) {
@@ -102,7 +58,7 @@ function drawPolygon(polygon, fill, stroke, strokeWidth) {
     }
   });
 
-  svg.innerHTML += `<path 
+  return `<path 
     stroke="${stroke}" 
     stroke-width="${strokeWidth}"
     stroke-linecap="round"
@@ -122,9 +78,13 @@ function drawMultiPolygon(
     return;
   }
 
+  let path = '';
+
   multiPolygon.forEach((polygon, index) => {
-    drawPolygon(polygon, fill, stroke, strokeWidth);
+    path += drawPolygon(polygon, fill, stroke, strokeWidth);
   });
+
+  return path;
 }
 
 function flattenPolygon(polygon) {
@@ -221,7 +181,7 @@ function createShape(userOptions = {}) {
     svg,
     cellSize: 2,
     threshold: 1,
-    numCircles: 90,
+    circlesCount: 90,
     center: {
       x: width * 0.4,
       y: height / 2
@@ -237,25 +197,82 @@ function createShape(userOptions = {}) {
 
   const m = new Metaballs(options);
 
-  const poly = flatToMultiPolygon(m.shapes);
-
-  let d = '';
-
-  m.shapes.forEach((line, index) => {
-    d += `M ${line.map(p => `${p.x} ${p.y}`).join(' L ')} Z`;
-  });
-
-  // svg.innerHTML += `<path
-  //   stroke="black"
-  //   stroke-width="1"
-  //   stroke-linecap="round"
-  //   stroke-linejoin="round"
-  //   fill="none"
-  //   d="${ d }"
-  // />`;
-
-  return poly;
+  return flatToMultiPolygon(m.shapes);
 }
+
+function createSeed() {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+
+const Options = function() {
+};
+
+const ShapeOptions = function() {
+  this.seed = createSeed();
+  this.cellSize = 2;
+  this.threshold = 1;
+  this.circlesCount = 90;
+  this.centerX = 0.4;
+  this.centerY = 0.4;
+  this.w = 0.66;
+  this.h = 0.5;
+  this.rMax = 13;
+  this.rMin = 2;
+};
+
+const options = new Options();
+
+function createShapeGui(gui, label) {
+  const shapeOptions = new ShapeOptions();
+  const folder = gui.addFolder(label);
+
+  options[label] = shapeOptions;
+
+  const controllers = [];
+
+  controllers.push(folder.add(shapeOptions, 'seed'));
+  controllers.push(folder.add(shapeOptions, 'cellSize', 1, 5));
+  controllers.push(folder.add(shapeOptions, 'threshold', 0.1, 3, 0.1));
+  controllers.push(folder.add(shapeOptions, 'circlesCount', 50, 150));
+  controllers.push(folder.add(shapeOptions, 'centerX', 0, 1, 0.05));
+  controllers.push(folder.add(shapeOptions, 'centerY', 0, 1, 0.05));
+  controllers.push(folder.add(shapeOptions, 'w', 0, 1, 0.05));
+  controllers.push(folder.add(shapeOptions, 'h', 0, 1, 0.05));
+  controllers.push(folder.add(shapeOptions, 'rMin', 1, 20));
+  controllers.push(folder.add(shapeOptions, 'rMax', 1, 20));
+
+  controllers.forEach(controller => {
+    controller.onFinishChange((a, b, c) => {
+      // TODO draw shapes
+    });
+  });
+}
+
+// Main
+
+const gui = new dat.GUI();
+
+createShapeGui(gui, 'shapeOne');
+createShapeGui(gui, 'shapeTwo');
+
+
+const seed = createSeed();
+const rng = seedrandom(seed);
+
+Math.random = rng;
+
+console.log('RNG seed: ' + seed);
+
+const width = 1000;
+const height = 1500;
+
+const svg = createSvg(width, height, 100);
+
+document.querySelector('#seed').innerHTML = seed;
+document.body.prepend(svg);
+
+drawBackground();
 
 const shape1 = createShape();
 const shape2 = createShape({
@@ -273,8 +290,12 @@ const union = fixHoles(martinez.union(shape1, shape2));
 
 const intersection = fixHoles(martinez.intersection(shape1, shape2));
 
-drawMultiPolygon(union, 'none', 'white', 40);
-drawMultiPolygon(diff1, 'hsl(210, 40%, 50%)');
-drawMultiPolygon(diff2, 'hsl(190, 40%, 50%)');
-drawMultiPolygon(intersection, 'hsl(200, 40%, 50%)');
-drawMultiPolygon(union, 'none', 'hsl(220, 40%, 50%)');
+let shapes = '<g>';
+shapes += drawMultiPolygon(union, 'none', 'white', 40);
+shapes += drawMultiPolygon(diff1, 'hsl(210, 40%, 50%)');
+shapes += drawMultiPolygon(diff2, 'hsl(190, 40%, 50%)');
+shapes += drawMultiPolygon(intersection, 'hsl(200, 40%, 50%)', 'hsl(200, 40%, 50%)', 1);
+shapes += drawMultiPolygon(union, 'none', 'hsl(220, 40%, 50%)');
+shapes += '</g>';
+
+svg.innerHTML += shapes;
