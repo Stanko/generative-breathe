@@ -4,15 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "parcel index.html"
+    "start": "parcel src/index.html"
   },
   "author": "Stanko",
   "dependencies": {
     "@anvaka/streamlines": "^1.1.0",
-    "dat.gui": "^0.7.6",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/preset-react": "^7.8.3",
+    "file-saver": "^2.0.2",
     "generative-utils": "git://github.com/Stanko/generative-utils.git",
     "martinez-polygon-clipping": "^0.6.0",
     "p5": "^0.10.2",
-    "parcel-bundler": "^1.12.4"
+    "parcel-bundler": "^1.12.4",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.4"
   }
 }

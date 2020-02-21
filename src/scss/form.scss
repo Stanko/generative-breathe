@@ -1,0 +1,62 @@
+.Button,
+button {
+  background: $background-color;
+  border-radius: 50px;
+  border: 1px solid $border-color;
+  color: $font-color;
+  display: inline-block;
+  font-size: 14px;
+  line-height: 1;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  outline: none;
+  padding: 8px 18px;
+  position: relative;
+  text-decoration: none;
+  transition: all 300ms;
+  z-index: 10;
+
+  &:hover {
+    color: darken($font-color, 20);
+    border-color: darken($border-color, 20);
+    cursor: pointer;
+  }
+  
+  &:active {
+    transform: translateY(1px);
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 2px $background-color, 0 0 0 3px darken($border-color, 20);
+  }
+}
+
+button::-moz-focus-inner {
+  border: 0;
+}
+
+input[type=text] {
+  background: $background-color;
+  border-radius: 2px;
+  border: 1px solid $border-color;
+  color: #999;
+  display: inline-block;
+  font-size: 14px;
+  outline: none;
+  padding: 6px 6px;
+  transition: all 300ms;
+
+  &:hover {
+    color: darken($border-color, 10);
+    border-color: $border-color;
+    cursor: pointer;
+  }
+  
+  &:active {
+    transform: translateY(1px);
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 2px $background-color, 0 0 0 3px darken($border-color, 20);
+  }
+}
