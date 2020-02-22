@@ -52,13 +52,13 @@ input[type=text] {
   -webkit-appearance: none;
 
   &:hover {
-    color: darken($border-color, 10);
+    color: darken($font-color, 10);
     border-color: $border-color;
     cursor: pointer;
   }
   
-  &:active {
-    transform: translateY(1px);
+  &:focus {
+    color: darken($font-color, 10);
   }
   
   &:focus {
