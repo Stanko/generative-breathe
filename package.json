@@ -4,23 +4,26 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "parcel src/index.html"
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html"
   },
   "author": "Stanko",
   "dependencies": {
     "@anvaka/streamlines": "^1.1.0",
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/preset-env": "^7.8.4",
-    "@babel/preset-react": "^7.8.3",
+    "@material-ui/core": "^4.9.3",
     "file-saver": "^2.0.2",
     "generative-utils": "git://github.com/Stanko/generative-utils.git",
     "martinez-polygon-clipping": "^0.6.0",
     "p5": "^0.10.2",
     "parcel-bundler": "^1.12.4",
     "react": "^16.12.0",
+    "react-animate-height": "^2.0.20",
     "react-dom": "^16.12.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.4"
+    "@babel/core": "^7.8.4",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-react": "^7.8.3"
   }
 }

@@ -1,5 +1,4 @@
-.Button,
-button {
+.Button  {
   background: $background-color;
   border-radius: 50px;
   border: 1px solid $border-color;
@@ -29,6 +28,10 @@ button {
   &:focus {
     box-shadow: 0 0 0 2px $background-color, 0 0 0 3px darken($border-color, 20);
   }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 button::-moz-focus-inner {
@@ -45,6 +48,8 @@ input[type=text] {
   outline: none;
   padding: 6px 6px;
   transition: all 300ms;
+  appearance: none;
+  -webkit-appearance: none;
 
   &:hover {
     color: darken($border-color, 10);

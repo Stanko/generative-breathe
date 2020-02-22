@@ -1,0 +1,43 @@
+.Accordion-toggle {
+  border: none;
+  border-bottom: 1px solid $border-color;
+  display: block;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 12px 0;
+  text-align: left;
+  text-transform: capitalize;
+  width: 100%;
+  color: $font-color;
+  outline: none;
+
+  &:first-of-type {
+    border-top: 1px solid $border-color;
+  }
+
+  svg {
+    height: 20px;
+    width: 20px;
+    flex-shrink: 0;
+    transition: transform 250ms;
+  }
+}
+
+.Accordion-toggleContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.Accordion-toggle--open {
+  font-weight: bold;
+
+  svg {
+    transform: rotate(0.5turn);
+  }
+}
+
+.Accordion-content {
+  padding: 20px 0;
+  border-bottom: 1px solid $border-color;
+}

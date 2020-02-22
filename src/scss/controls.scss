@@ -1,13 +1,38 @@
+.Controls {
+  flex-basis: 270px;
+  flex-shrink: 0;
+  z-index: 10;
+  position: relative;
+
+  @include md {
+    margin-right: 30px;
+  }
+
+  @include lg {
+    margin-right: 40px;
+  }
+
+  @include xl {
+    margin-right: 50px;
+  }
+}
+
 .Control {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   align-items: center;
 }
 
 .Control-label {
   flex-basis: 100%;
-  margin-bottom: 2px;
+  margin-bottom: 5px;
+}
+
+.Control-note {
+  color: #999;
+  font-size: 12px;
+  margin: 7px 0;
 }
 
 .Control-inputWrapper {
@@ -21,22 +46,17 @@
   }
 }
 
+.Controls-buttons {
+  margin-top: 20px;
+}
+
 .Control-value {
-  flex-basis: 130px;
+  flex-basis: 50px;
   text-align: right;
   flex-shrink: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.Controls-buttons {
-  margin-top: 50px;
-}
-
-.Controls-reset {
-  display: block;
-}
-
 
 .Controls-title {
   font-size: 26px;

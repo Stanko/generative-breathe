@@ -1,42 +1,17 @@
-svg {
+.Image-svg {
   overflow: visible;
   display: block;
   border: 1px solid $border-color;
-}
+  width: auto;
+  height: auto;
 
-marker {
-  overflow: visible;
-}
-
-path {
-}
-
-.GridLine {
-  stroke: $border-color;
-}
-
-.Vector {
-  stroke: #bbb;
-  stroke-width: 2;
-  filter: drop-shadow(1px 1px 0px black);
-}
-
-#marker-arrow path{
-  fill: #bbb;
-}
-
-.Image-downloadSection {
-  margin-top: 20px;
+  @include lg {
+    height: 100%;
+    max-width: 100%;
+  }
 }
 
 .Image-generateDownload {
+  margin: 20px 0 40px;
   display: block;
-}
-
-.Image-downloadNote {
-  font-size: 14px;
-  color: #777;
-  line-height: 18px;
-  max-width: 600px;
-  margin-top: 40px;
 }
