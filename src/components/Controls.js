@@ -62,7 +62,7 @@ export default class Controls extends Component {
       lowPoly: true,
       imageHeight: 1500,
       imageWidth: 1000,
-      margin: 100,
+      margin: 150,
       backgroundStep: 20,
       backgroundSeed: getRandomString(),
       shapeOneSeed: getRandomString(),
@@ -353,7 +353,7 @@ export default class Controls extends Component {
               value={margin}
               type="range"
               min={0}
-              max={200}
+              max={300}
               step={10}
               setState={this.setHash}
             />
