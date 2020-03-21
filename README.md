@@ -2,7 +2,7 @@
 
 Generative art piece.
 
-[https://breath-v1.netlify.com](breath-v1.netlify.com)
+[https://breathe-v1.netlify.com](breathe-v1.netlify.com)
 
 All generated images have unique URL you can easily share.
 
