@@ -6,7 +6,7 @@ Generative art piece.
 
 All generated images have unique URL you can easily share.
 
-If you end up using Breathe, please let me know, I would love to see it in the wild. Just open an issue with what you did with it.
+If you end up using Breathe, please let me know, I would love to see it in the wild. Just open an issue with the image and tell me what did you use it for. Thank you!
 
 ## Example image
 
