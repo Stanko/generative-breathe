@@ -2,7 +2,7 @@
 
 Generative art piece.
 
-[breathe-v1.netlify.com](https://breathe-v1.netlify.com)
+[https://breathe.muffinman.io/](https://breathe.muffinman.io/)
 
 All generated images have unique URL you can easily share.
 
@@ -10,7 +10,7 @@ If you end up using Breathe, please let me know, I would love to see it in the w
 
 ## Example image
 
-[![Image generated using Breathe](./src/example.png)](https://breath-v1.netlify.com/#/false/1500/1100/100/20/2/1/90/0.4/0.5/0.66/0.5/13/2/51/1/90/0.6/0.5/0.66/0.5/13/2/9wsgmrllflr/amw86wbb36a/ju9salr44nc)
+[![Image generated using Breathe](./src/example.png)](https://breathe.muffinman.io/#/false/1500/1100/100/20/2/1/90/0.4/0.5/0.66/0.5/13/2/51/1/90/0.6/0.5/0.66/0.5/13/2/9wsgmrllflr/amw86wbb36a/ju9salr44nc)
 
 ## Running it locally
 
